@@ -1,0 +1,57 @@
+import streamlit as st
+
+st.set_page_config(page_title="CRISPR Virtual Lab", layout="centered")
+
+st.title("🧬 CRISPR Gene Editing Virtual Lab")
+
+st.write("Simulate CRISPR-Cas9 gene editing with guide RNA targeting.")
+
+# Input
+dna = st.text_input("Enter DNA Sequence", "ATGCGTACGTTAGG")
+grna = st.text_input("Enter Guide RNA (gRNA)", "CGTAC")
+
+if st.button("Run Experiment"):
+
+    dna = dna.upper()
+    grna = grna.upper()
+
+    if not dna or not grna:
+        st.warning("⚠️ Please enter both DNA and gRNA")
+    else:
+        index = dna.find(grna)
+
+        if index == -1:
+            st.error("❌ No matching target found")
+        else:
+            pam = dna[index + len(grna): index + len(grna) + 3]
+
+            if not pam.endswith("GG"):
+                st.warning("⚠️ Target found but no valid PAM (NGG)")
+            else:
+                st.success("✅ Valid Target Found!")
+
+                # Highlight
+                before = dna[:index]
+                target = dna[index:index + len(grna)]
+                after = dna[index + len(grna):]
+
+                st.markdown(f"""
+                **🔍 Target Sequence:**
+                `{before}` :red[`{target}`] `{after}`
+                """)
+
+                st.write(f"🧬 PAM Sequence: {pam}")
+
+                cut_pos = index + len(grna) // 2
+
+                st.markdown(f"""
+                **✂️ Cut Site:**
+                `{dna[:cut_pos]}` :blue[|CUT|] `{dna[cut_pos:]}`
+                """)
+
+                mutated = dna[:cut_pos] + dna[cut_pos+2:]
+
+                st.markdown(f"""
+                **🧪 After Mutation (Deletion):**
+                `{mutated}`
+                """)
